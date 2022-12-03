@@ -70,7 +70,7 @@ X = lose
 Y = draw
 Z = win
 */
-func NewRound(line string) round {
+func newRound(line string) round {
 	m := map[string]int{
 		"X": lose,
 		"Y": draw,
@@ -97,7 +97,7 @@ func tournament(input string) int {
 	total := 0
 	var r round
 	for _, line := range strings.Split(input, "\n") {
-		r = NewRound(line)
+		r = newRound(line)
 		total = total + r.result()
 	}
 

@@ -108,7 +108,7 @@ func TestNewRound(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := NewRound(c.actual)
+			got := newRound(c.actual)
 			if c.expected != got {
 				t.Errorf("expected %v, got %v", c.expected, got)
 			}
