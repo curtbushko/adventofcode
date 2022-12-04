@@ -8,9 +8,9 @@ import (
 func expandID(str string) []int {
 	s := strings.Split(str, "-")
 
-	r1, _ := strconv.Atoi(s[0])
-	r2, _ := strconv.Atoi(s[1])
-	return []int{r1, r2}
+	min, _ := strconv.Atoi(s[0])
+	max, _ := strconv.Atoi(s[1])
+	return []int{min, max}
 }
 
 func contains(s1, s2 []int) bool {
@@ -23,10 +23,6 @@ func contains(s1, s2 []int) bool {
 	return (min1 <= min2 && max1 >= max2 ||
 		min1 >= min2 && max1 <= max2)
 }
-
-/*
-
- */
 
 func overlaps(s1, s2 []int) bool {
 	min1 := s1[0]
