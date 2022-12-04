@@ -14,49 +14,31 @@ func expandID(str string) []int {
 }
 
 func contains(s1, s2 []int) bool {
-	// ie 1-2 and 3-4
-	if s1[0] < s2[0] && s1[1] < s2[1] {
-		return false
-	}
+	min1 := s1[0]
+	max1 := s1[1]
 
-	// ie 3-4 and 1-2
-	if s1[0] > s2[0] && s1[1] > s2[1] {
-		return false
-	}
+	min2 := s2[0]
+	max2 := s2[1]
 
-	if s1[0] <= s2[0] && s1[1] >= s2[1] {
-		return true
-	}
-
-	if s1[0] >= s2[0] && s1[1] <= s2[1] {
-		return true
-	}
-	return false
+	return (min1 <= min2 && max1 >= max2 ||
+		min1 >= min2 && max1 <= max2)
 }
 
+/*
+
+ */
+
 func overlaps(s1, s2 []int) bool {
-	m1 := make(map[int]struct{})
-	for i := s1[0]; i <= s1[1]; i++ {
-		m1[i] = struct{}{}
-	}
+	min1 := s1[0]
+	max1 := s1[1]
 
-	m2 := make(map[int]struct{})
-	for i := s2[0]; i <= s2[1]; i++ {
-		m2[i] = struct{}{}
-	}
+	min2 := s2[0]
+	max2 := s2[1]
 
-	for i := range m1 {
-		if _, exists := m2[i]; exists {
-			return true
-		}
-	}
-
-	for i := range m2 {
-		if _, exists := m1[i]; exists {
-			return true
-		}
-	}
-	return false
+	return (min1 >= min2 && min1 <= max2) ||
+		(max1 >= min2 && max1 <= max2) ||
+		(min2 >= min1 && min2 <= max1) ||
+		(max2 >= min1 && max2 <= max1)
 }
 
 func cleanupContains(input string) int {
