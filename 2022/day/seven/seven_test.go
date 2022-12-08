@@ -5,30 +5,40 @@ import (
 )
 
 func Test_Input(t *testing.T) {
+	var total, smallest int
 	cases := []struct {
-		name     string
-		actual   string
-		expected int
+		name              string
+		actual            string
+		total_expected    int
+		smallest_expected int
 	}{
 		{
-			name:     "example",
-			actual:   input,
-			expected: 95437,
+			name:              "example",
+			actual:            input,
+			total_expected:    95437,
+			smallest_expected: 24933642,
 		},
 
 		{
-			name:     "example 2",
-			actual:   input2,
-			expected: 1844187,
+			name:              "example 2",
+			actual:            input2,
+			total_expected:    1844187,
+			smallest_expected: 4978279,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			parseInput(c.actual)
-			got := CalculateTotals(RootPath)
-			if c.expected != got {
-				t.Errorf("expected %v, got %v", c.expected, got)
+			NewFs(RootPath)
+			CreateFs(c.actual)
+			total, smallest = CalculateTotals(RootPath)
+			if c.total_expected != total {
+				t.Errorf("expected %v, got %v", c.total_expected, total)
 			}
+			if c.smallest_expected != smallest {
+				t.Errorf("expected %v, got %v", c.smallest_expected, smallest)
+			}
+
+			DeleteFs(RootPath)
 		})
 	}
 }

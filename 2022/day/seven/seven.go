@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -12,7 +13,9 @@ import (
 )
 
 const (
-	minDirsize = 100000
+	minDirsize     = 100000
+	totalHDSpace   = 70000000
+	AppNeededSpace = 30000000
 )
 
 var (
@@ -25,7 +28,11 @@ func NewFs(rootPath string) {
 	_ = Fs.MkdirAll(rootPath, 0755)
 }
 
-func parseInput(input string) {
+func DeleteFs(rootPath string) {
+	_ = Fs.RemoveAll(RootPath)
+}
+
+func CreateFs(input string) {
 	currentDir := RootPath
 	NewFs(RootPath)
 	for _, line := range strings.Split(input, "\n") {
@@ -52,8 +59,6 @@ func Command(cmd []string, currentDir string) string {
 		default:
 			currentDir = path.Join(currentDir, cmd[2])
 		}
-		// case "ls":
-		//		Tree(currentDir)
 	}
 	return currentDir
 }
@@ -74,8 +79,8 @@ func File(f []string, currentDir string) {
 	fmt.Println("Created file: ", name, stats.Size())
 }
 
-func CalculateTotals(dir string) int {
-	m := make(map[string]int)
+func CalculateTotals(dir string) (total, smallest int) {
+	dirs := make(map[string]int)
 
 	err := Afs.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -88,17 +93,17 @@ func CalculateTotals(dir string) int {
 		}
 
 		fullPath := filepath.Dir(path) // get the base path
-		dirs := strings.Split(fullPath, "/")
+		dirPaths := strings.Split(fullPath, "/")
 		stats, _ := Fs.Stat(path)
 		size := int(stats.Size())
 
 		// Add the filesize to all the parent directories
 		// Create a unique key that is make up of the path
 		var key string
-		for _, v := range dirs {
+		for _, v := range dirPaths {
 			key = key + v
-			dirTotal := m[key]
-			m[key] = dirTotal + size
+			dirTotal := dirs[key]
+			dirs[key] = dirTotal + size
 		}
 
 		return nil
@@ -107,14 +112,30 @@ func CalculateTotals(dir string) int {
 		fmt.Printf("filepath.Walk() returned %v\n", err)
 	}
 
-	total := 0
-	for k, v := range m {
+	// Figure out the totals
+	for k, v := range dirs {
 		if v < minDirsize {
 			fmt.Println("Directory:", k, "Total:", v)
 			total = total + v
 		}
 	}
-
 	fmt.Println("Total:", total)
-	return total
+
+	// Figure out the smallest directory to remove to free up enough space
+	// for the app to run
+	sizes := make([]int, 0, len(dirs))
+	for _, size := range dirs {
+		sizes = append(sizes, size)
+	}
+	sort.Ints(sizes)
+	availableSpace := totalHDSpace - dirs["root"]
+	for _, s := range sizes {
+		newSpace := availableSpace + s
+		if newSpace > AppNeededSpace {
+			smallest = s
+			break
+		}
+	}
+	fmt.Println("Smallest:", smallest)
+	return total, smallest
 }
