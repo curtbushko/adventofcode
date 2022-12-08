@@ -35,5 +35,5 @@ func Test_CurrentLine(t *testing.T) {
 	}
 
 	got := g.ProcessCurrentLine()
-	assert.Equal(t, 2, got)
+	assert.Equal(t, 4, got)
 }

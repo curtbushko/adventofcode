@@ -14,11 +14,7 @@ type Grid struct {
 }
 
 func ProcessGrid(input string) (total int, err error) {
-	g := &Grid{
-		previous: []int{},
-		current:  []int{},
-		next:     []int{},
-	}
+	g := &Grid{}
 
 	file, err := os.Open(input)
 	if err != nil {
@@ -28,9 +24,9 @@ func ProcessGrid(input string) (total int, err error) {
 
 	rd := bufio.NewReader(file)
 
+	cursor := 0
 	for {
 
-		cursor := 0
 		line, err := rd.ReadString('\n')
 		if err != nil {
 			if err == io.EOF {
@@ -43,17 +39,21 @@ func ProcessGrid(input string) (total int, err error) {
 		switch cursor {
 		case 0:
 			g.current = linetoSlice(line)
+			g.previous = linetoSlice(line) //buffer
+			g.next = linetoSlice(line)     // buffer
 			total = total + g.ProcessFirstLine()
 		case 1:
-			g.previous = g.current
+			copy(g.previous, g.current)
 			g.current = linetoSlice(line)
 		default:
-			g.previous = g.current
-			g.current = g.next
+			copy(g.previous, g.current)
+			copy(g.current, g.next)
 			g.next = linetoSlice(line)
 			total = total + g.ProcessCurrentLine()
 		}
 
+		fmt.Println(cursor)
+		g.Print()
 		cursor++
 	}
 	return
@@ -62,23 +62,24 @@ func ProcessGrid(input string) (total int, err error) {
 func (g Grid) ProcessCurrentLine() int {
 	var total int
 
-	for i, _ := range g.current {
+	for i := range g.current {
 		fmt.Println("[", g.previous[i], "] [", g.current[i], "] [", g.next[i], "]")
-		if i == 0 || i == len(g.current)-1 {
+		if i == 0 {
+			total++
+			continue
+		}
+
+		if i == (len(g.current) - 1) {
 			total++
 			break
 		}
-
 		if g.current[i] > g.previous[i] || // top
 			g.current[i] > g.next[i] || // below
-			g.current[i] > g.current[g.current[i-1]] || // below
+			g.current[i] > g.current[i-1] || // below
 			g.current[i] > g.current[i+1] { // below
 			total++
 		}
 
-		if i == len(g.current) {
-			total++
-		}
 	}
 
 	return total
@@ -100,9 +101,17 @@ func (g Grid) Print() {
 }
 
 func linetoSlice(str string) []int {
-	slice := make([]int, len(str))
+	slice := make([]int, 0)
 	for _, i := range str {
 		slice = append(slice, int(i))
 	}
 	return slice
 }
+
+// func copyIntSlice(dest, src []int) []int {
+// 	if len(dest) == 0 {
+// 		dest := make([]int, len(src))
+// 	}
+// 	copy(dest, src)
+// 	return dest
+// }
