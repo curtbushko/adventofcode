@@ -29,11 +29,11 @@ func Test_ProcessGrid(t *testing.T) {
 
 func Test_CurrentLine(t *testing.T) {
 	g := &Grid{
-		previous: "30373",
-		current:  "25512",
-		next:     "65332",
+		previous: []int{3, 0, 3, 7, 3},
+		current:  []int{2, 5, 5, 1, 2},
+		next:     []int{6, 5, 3, 3, 2},
 	}
 
 	got := g.ProcessCurrentLine()
-	assert.Equal(t, 4, got)
+	assert.Equal(t, 2, got)
 }
