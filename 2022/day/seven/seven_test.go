@@ -4,24 +4,6 @@ import (
 	"testing"
 )
 
-//	func TestExist(t *testing.T) {
-//		Fs := afero.NewMemMapFs()
-//		Afs := &afero.Afero{Fs: Fs}
-//		// create test files and directories
-//
-//		key := make([]byte, 548)
-//
-//		Fs.MkdirAll("/", 0755)
-//		afero.WriteFile(Fs, "a/b", key, 0644)
-//		afero.WriteFile(Fs, "src/c", []byte("file c"), 0644)
-//		name := "src/a/b"
-//		stats, err := Fs.Stat(name)
-//		fmt.Println(stats.Size())
-//		Tree("src/a")
-//		if os.IsNotExist(err) {
-//			t.Errorf("file \"%s\" does not exist.\n", name)
-//		}
-//	}
 func Test_Input(t *testing.T) {
 	cases := []struct {
 		name     string
@@ -31,19 +13,19 @@ func Test_Input(t *testing.T) {
 		{
 			name:     "example",
 			actual:   input,
-			expected: 73314807,
+			expected: 95437,
 		},
 
 		{
 			name:     "example 2",
 			actual:   input2,
-			expected: 73314807,
+			expected: 1844187,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			parseInput(c.actual)
-			got := Tree("/")
+			got := CalculateTotals(RootPath)
 			if c.expected != got {
 				t.Errorf("expected %v, got %v", c.expected, got)
 			}

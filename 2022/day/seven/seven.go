@@ -26,7 +26,6 @@ func NewFs(rootPath string) {
 }
 
 func parseInput(input string) {
-	total := 0
 	currentDir := RootPath
 	NewFs(RootPath)
 	for _, line := range strings.Split(input, "\n") {
@@ -37,7 +36,7 @@ func parseInput(input string) {
 		case "dir":
 			Dir(f[1], currentDir)
 		default:
-			total = File(f, currentDir, total)
+			File(f, currentDir)
 		}
 	}
 }
@@ -65,7 +64,7 @@ func Dir(dir string, currentDir string) {
 	fmt.Println("Created directory: ", currentDir)
 }
 
-func File(f []string, currentDir string, total int) int {
+func File(f []string, currentDir string) {
 	size, _ := strconv.Atoi(f[0])
 	name := path.Join(currentDir, f[1])
 	contents := make([]byte, size)
@@ -73,10 +72,9 @@ func File(f []string, currentDir string, total int) int {
 	_ = afero.WriteFile(Fs, name, contents, 0644)
 	stats, _ := Fs.Stat(name)
 	fmt.Println("Created file: ", name, stats.Size())
-	return total
 }
 
-func Tree(dir string) int {
+func CalculateTotals(dir string) int {
 	m := make(map[string]int)
 
 	err := Afs.Walk(dir, func(path string, info os.FileInfo, err error) error {
@@ -94,32 +92,11 @@ func Tree(dir string) int {
 		stats, _ := Fs.Stat(path)
 		size := int(stats.Size())
 
-		if len(dirs) > 3 {
-			key := dirs[3]
-			dirTotal := m[key]
-			m[key] = dirTotal + size
-
-			// Increase parent too
-			parent := dirs[2]
-			parentTotal := m[parent]
-			m[parent] = parentTotal + size
-
-			// Increase grandparent too
-			grandparent := dirs[1]
-			grandparentTotal := m[grandparent]
-			m[grandparent] = grandparentTotal + size
-
-		} else if len(dirs) > 2 {
-			key := dirs[2]
-			dirTotal := m[key]
-			m[key] = dirTotal + size
-
-			// Increase parent too
-			parent := dirs[1]
-			parentTotal := m[parent]
-			m[parent] = parentTotal + size
-		} else {
-			key := dirs[1]
+		// Add the filesize to all the parent directories
+		// Create a unique key that is make up of the path
+		var key string
+		for _, v := range dirs {
+			key = key + v
 			dirTotal := m[key]
 			m[key] = dirTotal + size
 		}
@@ -132,9 +109,8 @@ func Tree(dir string) int {
 
 	total := 0
 	for k, v := range m {
-
-		fmt.Println("Directory:", k, "Total:", v)
-		if v >= minDirsize {
+		if v < minDirsize {
+			fmt.Println("Directory:", k, "Total:", v)
 			total = total + v
 		}
 	}
