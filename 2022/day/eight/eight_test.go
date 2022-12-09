@@ -17,6 +17,11 @@ func Test_ProcessGrid(t *testing.T) {
 			actual:   "example.input",
 			expected: 21,
 		},
+		{
+			name:     "large example",
+			actual:   "large.input",
+			expected: 1807,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

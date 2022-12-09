@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 )
 
 type Grid struct {
@@ -14,7 +15,9 @@ type Grid struct {
 }
 
 func ProcessGrid(input string) (total int, err error) {
-	g := &Grid{}
+	g := &Grid{
+		previous: []int{},
+	}
 
 	file, err := os.Open(input)
 	if err != nil {
@@ -36,24 +39,22 @@ func ProcessGrid(input string) (total int, err error) {
 			}
 		}
 
+		// line = next
 		switch cursor {
 		case 0:
-			g.current = linetoSlice(line)
-			g.previous = linetoSlice(line) //buffer
-			g.next = linetoSlice(line)     // buffer
+			g.previous = make([]int, len(line))
+			g.current = make([]int, len(line))
+			g.next = linetoSlice(line)
 			total = total + g.ProcessFirstLine()
 		case 1:
-			copy(g.previous, g.current)
-			g.current = linetoSlice(line)
+			copy(g.current, g.next)
+			g.next = linetoSlice(line)
 		default:
 			copy(g.previous, g.current)
 			copy(g.current, g.next)
 			g.next = linetoSlice(line)
 			total = total + g.ProcessCurrentLine()
 		}
-
-		fmt.Println(cursor)
-		g.Print()
 		cursor++
 	}
 	return
@@ -63,7 +64,7 @@ func (g Grid) ProcessCurrentLine() int {
 	var total int
 
 	for i := range g.current {
-		fmt.Println("[", g.previous[i], "] [", g.current[i], "] [", g.next[i], "]")
+		fmt.Println(g.previous[i], g.current[i], g.next[i])
 		if i == 0 {
 			total++
 			continue
@@ -73,10 +74,13 @@ func (g Grid) ProcessCurrentLine() int {
 			total++
 			break
 		}
-		if g.current[i] > g.previous[i] || // top
-			g.current[i] > g.next[i] || // below
-			g.current[i] > g.current[i-1] || // below
-			g.current[i] > g.current[i+1] { // below
+		// top
+		for j = i; j > 0; j-- {
+		}
+		if g.current[i] >= g.previous[i] || // top
+			g.current[i] >= g.next[i] || // below
+			g.current[i] >= g.current[i-1] || // below
+			g.current[i] >= g.current[i+1] { // below
 			total++
 		}
 
@@ -85,33 +89,48 @@ func (g Grid) ProcessCurrentLine() int {
 	return total
 }
 
+func (g Grid) isVisible(cursor int) bool {
+	// top
+	for i := cursor; i > 0; i-- {
+		if g.current[cursor] > g.previous[i] {
+			return true
+		}
+	}
+
+	// right
+	for i := cursor; i < len(g.current)-1; i++ {
+		if g.current[cursor] > g.current[i+1] {
+			return true
+		}
+	}
+
+	// left
+	for i := cursor; i > 0; i-- {
+		if g.current[cursor] > g.current[i-1] {
+			return true
+		}
+	}
+
+	// down
+	for i := cursor; i > 0; i-- {
+		if g.current[cursor] > g.current[i-1] {
+			return true
+		}
+	}
+}
+
 func (g Grid) ProcessLastLine() int {
-	return 0
+	return len(g.current)
 }
 
 func (g Grid) ProcessFirstLine() int {
 	return len(g.current)
 }
 
-func (g Grid) Print() {
-	fmt.Println("------")
-	fmt.Println("previous:", g.previous)
-	fmt.Println("current:", g.current)
-	fmt.Println("next:", g.next)
-}
-
 func linetoSlice(str string) []int {
-	slice := make([]int, 0)
-	for _, i := range str {
-		slice = append(slice, int(i))
+	slice := make([]int, len(str))
+	for i := range str {
+		slice[i], _ = strconv.Atoi(string(str[i]))
 	}
 	return slice
 }
-
-// func copyIntSlice(dest, src []int) []int {
-// 	if len(dest) == 0 {
-// 		dest := make([]int, len(src))
-// 	}
-// 	copy(dest, src)
-// 	return dest
-// }
