@@ -44,11 +44,11 @@ func Test_RunTwo(t *testing.T) {
 			actual:   "larger_example.input",
 			expected: 36,
 		},
-		// {
-		// 	name:     "large example",
-		// 	actual:   "large.input",
-		// 	expected: 6175,
-		// },
+		{
+			name:     "large example",
+			actual:   "large.input",
+			expected: 2578,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -61,7 +61,6 @@ func Test_RunTwo(t *testing.T) {
 }
 
 func Test_Moves(t *testing.T) {
-
 	head := Head{
 		Coords{x: 0, y: 0},
 	}
@@ -118,5 +117,4 @@ func Test_Moves(t *testing.T) {
 	tail.Move(head)
 	assert.Equal(t, 4, tail.x)
 	assert.Equal(t, 1, tail.y)
-
 }

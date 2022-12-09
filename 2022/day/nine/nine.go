@@ -82,11 +82,10 @@ func runTwo(filename string) int {
 		for i := 0; i < dist; i++ {
 			h.Move(dir)
 			t[0].Move(h)
-			m[Coords{t[0].x, t[0].y}] = true
 			for j := 1; j < knots; j++ {
 				t[j].MoveTail(t[j-1])
-				m[Coords{t[0].x, t[0].y}] = true
 			}
+			m[Coords{t[knots-1].x, t[knots-1].y}] = true
 		}
 
 	}
