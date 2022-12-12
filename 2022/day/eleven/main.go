@@ -10,12 +10,8 @@ import (
 )
 
 const (
-	rounds int = 2
+	rounds int = 10000
 )
-
-type Troop struct {
-	m []Monkey
-}
 
 type Monkey struct {
 	id       int
@@ -56,7 +52,7 @@ func (m Monkey) Operation(old int) (worry int) {
 	f := strings.Fields(m.op)
 
 	term := 0
-	switch f[1] {
+	switch f[2] {
 	case "old":
 		term = old
 	default:
@@ -70,7 +66,8 @@ func (m Monkey) Operation(old int) (worry int) {
 		worry = old + term
 	}
 
-	return worry / 3
+	return worry
+	// return worry
 }
 
 func (m Monkey) Target(worry int) int {
@@ -84,15 +81,13 @@ func main() {
 	fmt.Println("hello world")
 }
 
-func makeTroop(input string) Troop {
-	t := Troop{
-		m: make([]Monkey, 0),
-	}
+func makeMonkies(input string) []Monkey {
+	m := make([]Monkey, 0)
 
 	for _, v := range strings.Split(input, "\n\n") {
-		t.m = append(t.m, makeMonkey(v))
+		m = append(m, makeMonkey(v))
 	}
-	return t
+	return m
 }
 
 func makeMonkey(input string) Monkey {
@@ -125,34 +120,37 @@ func makeMonkey(input string) Monkey {
 	return m
 }
 
-func (t *Troop) processMonkeys() (total int) {
+func processMonkeys(m []Monkey) (total int) {
+	activity := make([]int, len(m))
+
 	for i := 0; i < rounds; i++ {
-		for thrower := range t.m {
-			num := len(t.m[thrower].items)
+		// fmt.Println("Round ", i)
+		for thrower := range m {
+			num := len(m[thrower].items)
 			for j := 0; j < num; j++ {
-				worry := t.m[thrower].Operation(t.m[thrower].items[0])
-				target := t.m[thrower].Target(worry)
-				_ = t.m[thrower].Throw()
-				t.m[thrower].activity++
-				t.m[target].Catch(worry)
-				t.m[target].activity++
-				fmt.Println("Monkey: ", t.m[thrower].id, "items: ", t.m[thrower].items, "worry: ", worry, "target: ", target)
+				worry := m[thrower].Operation(m[thrower].items[0])
+				target := m[thrower].Target(worry)
+				fmt.Println("Monkey ", m[thrower].id, "items: ", m[thrower].items, "worry: ", worry, "target: ", target)
+				_ = m[thrower].Throw()
+				activity[thrower]++
+				m[target].Catch(worry)
+				// activity[target]++
 			}
 		}
 
-		// for thrower := range t.m {
-		// 	fmt.Println("Round: ", i, "Monkey: ", t.m[thrower].id, "items: ", t.m[thrower].items)
+		// for thrower := range m {
+		// 	fmt.Println("Round: ", i, "Monkey: ", m[thrower].id, "items: ", m[thrower].items)
 		// }
 	}
 
-	business := make([]int, 0)
-	for k, m := range t.m {
-		fmt.Println("Activity for Monkey: ", k, "is: ", m.activity)
-		business = append(business, m.activity)
+	// business := make([]int, 0)
+	for k := range activity {
+		fmt.Println("Activity for Monkey: ", k, "is: ", activity[k])
 	}
-	sort.Ints(business)
-	len := len(business)
-	total = business[len-1] * business[len-2]
+	sort.Ints(activity)
+	fmt.Println(activity)
+	len := len(activity)
+	total = activity[len-1] * activity[len-2]
 	fmt.Println("Total:", total)
 	return total
 }

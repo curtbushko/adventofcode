@@ -34,77 +34,73 @@ func Test_MakeMonkey(t *testing.T) {
 	}
 }
 
-func Test_MakeTroop(t *testing.T) {
+func Test_MakeMonkies(t *testing.T) {
 	cases := []struct {
 		name     string
 		actual   string
-		expected Troop
+		expected []Monkey
 	}{
 		{
 			name:   "example",
 			actual: monkey0,
-			expected: Troop{
-				[]Monkey{
-					{
-						id:       0,
-						items:    []int{79, 98},
-						op:       "old * 19",
-						test:     23,
-						ttarget:  0,
-						ftarget:  0,
-						activity: 0,
-					},
+			expected: []Monkey{
+				{
+					id:       0,
+					items:    []int{79, 98},
+					op:       "old * 19",
+					test:     23,
+					ttarget:  0,
+					ftarget:  0,
+					activity: 0,
 				},
 			},
 		},
 		{
 			name:   "example input from aoc",
 			actual: inputaoc,
-			expected: Troop{
-				[]Monkey{
-					{
-						id:       0,
-						items:    []int{79, 98},
-						op:       "old * 19",
-						test:     23,
-						ttarget:  2,
-						ftarget:  3,
-						activity: 0,
-					},
-					{
-						id:       1,
-						items:    []int{54, 65, 75, 74},
-						op:       "old + 6",
-						test:     19,
-						ttarget:  2,
-						ftarget:  0,
-						activity: 0,
-					},
-					{
-						id:       2,
-						items:    []int{79, 60, 97},
-						op:       "old * old",
-						test:     13,
-						ttarget:  1,
-						ftarget:  3,
-						activity: 0,
-					},
-					{
-						id:       3,
-						items:    []int{74},
-						op:       "old + 3",
-						test:     17,
-						ttarget:  0,
-						ftarget:  1,
-						activity: 0,
-					},
+			expected: []Monkey{
+				{
+					id:       0,
+					items:    []int{79, 98},
+					op:       "old * 19",
+					test:     23,
+					ttarget:  2,
+					ftarget:  3,
+					activity: 0,
+				},
+				{
+					id:       1,
+					items:    []int{54, 65, 75, 74},
+					op:       "old + 6",
+					test:     19,
+					ttarget:  2,
+					ftarget:  0,
+					activity: 0,
+				},
+				{
+					id:       2,
+					items:    []int{79, 60, 97},
+					op:       "old * old",
+					test:     13,
+					ttarget:  1,
+					ftarget:  3,
+					activity: 0,
+				},
+				{
+					id:       3,
+					items:    []int{74},
+					op:       "old + 3",
+					test:     17,
+					ttarget:  0,
+					ftarget:  1,
+					activity: 0,
 				},
 			},
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := makeTroop(c.actual)
+			got := makeMonkies(c.actual)
 			assert.Equal(t, c.expected, got)
 		})
 	}
@@ -123,15 +119,20 @@ func Test_ProcessMonkeys(t *testing.T) {
 		},
 
 		// {
-		// 	name:     "example",
-		// 	actual:   inputaoc,
+		// 	name:   "large input",
+		// 	actual: largeinput,
+		//
+		// 	// expected: 15310845153,
 		// 	expected: 72884,
 		// },
+
+		// large expected (from file) 15310845153
+
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			troop := makeTroop(c.actual)
-			got := troop.processMonkeys()
+			m := makeMonkies(c.actual)
+			got := processMonkeys(m)
 			assert.Equal(t, c.expected, got)
 		})
 	}
@@ -143,15 +144,20 @@ func Test_MonkeyOperation(t *testing.T) {
 		actual   string
 		expected int
 	}{
+		// {
+		// 	name:     "monkey 0",
+		// 	actual:   monkey0,
+		// 	expected: 500,
+		// },
+		// {
+		// 	name:     "monkey 1",
+		// 	actual:   monkey1,
+		// 	expected: 20,
+		// },
 		{
-			name:     "monkey 0",
-			actual:   monkey0,
-			expected: 500,
-		},
-		{
-			name:     "monkey 1",
-			actual:   monkey1,
-			expected: 20,
+			name:     "monkey 2",
+			actual:   monkey2,
+			expected: 6241,
 		},
 	}
 	for _, c := range cases {
@@ -241,6 +247,13 @@ const monkey1 = `Monkey 1:
     If true: throw to monkey 2
     If false: throw to monkey 0`
 
+const monkey2 = `Monkey 2:
+  Starting items: 79, 60, 97
+  Operation: new = old * old
+  Test: divisible by 13
+    If true: throw to monkey 1
+    If false: throw to monkey 3`
+
 const inputaoc = `Monkey 0:
   Starting items: 79, 98
   Operation: new = old * 19
@@ -296,3 +309,59 @@ Monkey 3:
   Test: divisible by 17
     If true: throw to monkey 0
     If false: throw to monkey 1`
+
+const largeinput = `Monkey 0:
+  Starting items: 89, 95, 92, 64, 87, 68
+  Operation: new = old * 11
+  Test: divisible by 2
+    If true: throw to monkey 7
+    If false: throw to monkey 4
+
+Monkey 1:
+  Starting items: 87, 67
+  Operation: new = old + 1
+  Test: divisible by 13
+    If true: throw to monkey 3
+    If false: throw to monkey 6
+
+Monkey 2:
+  Starting items: 95, 79, 92, 82, 60
+  Operation: new = old + 6
+  Test: divisible by 3
+    If true: throw to monkey 1
+    If false: throw to monkey 6
+
+Monkey 3:
+  Starting items: 67, 97, 56
+  Operation: new = old * old
+  Test: divisible by 17
+    If true: throw to monkey 7
+    If false: throw to monkey 0
+
+Monkey 4:
+  Starting items: 80, 68, 87, 94, 61, 59, 50, 68
+  Operation: new = old * 7
+  Test: divisible by 19
+    If true: throw to monkey 5
+    If false: throw to monkey 2
+
+Monkey 5:
+  Starting items: 73, 51, 76, 59
+  Operation: new = old + 8
+  Test: divisible by 7
+    If true: throw to monkey 2
+    If false: throw to monkey 1
+
+Monkey 6:
+  Starting items: 92
+  Operation: new = old + 5
+  Test: divisible by 11
+    If true: throw to monkey 3
+    If false: throw to monkey 0
+
+Monkey 7:
+  Starting items: 99, 76, 78, 76, 79, 90, 89
+  Operation: new = old + 7
+  Test: divisible by 5
+    If true: throw to monkey 4
+    If false: throw to monkey 5`
