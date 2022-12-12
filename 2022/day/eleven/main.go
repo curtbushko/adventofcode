@@ -127,22 +127,22 @@ func makeMonkey(input string) Monkey {
 
 func (t *Troop) processMonkeys() (total int) {
 	for i := 0; i < rounds; i++ {
-		fmt.Println("Round: ", i)
-		for _, mon := range t.m {
-			num := len(mon.items)
+		for thrower := range t.m {
+			num := len(t.m[thrower].items)
 			for j := 0; j < num; j++ {
-				worry := mon.Operation(mon.items[0])
-				target := mon.Target(worry)
-				it := mon.Throw()
-				// fmt.Println("Monkey ", m.id, "throws ", it, "to ", "Monkey ", target)
-				t.m[target].Catch(it)
-				fmt.Println("Target: ", target, "Target items:", t.m[target].items)
-				mon.activity++
+				worry := t.m[thrower].Operation(t.m[thrower].items[0])
+				target := t.m[thrower].Target(worry)
+				_ = t.m[thrower].Throw()
+				t.m[thrower].activity++
+				t.m[target].Catch(worry)
 				t.m[target].activity++
-				// fmt.Println("Round: ", i, "Monkey: ", mon.id, "items: ", mon.items)
+				fmt.Println("Monkey: ", t.m[thrower].id, "items: ", t.m[thrower].items, "worry: ", worry, "target: ", target)
 			}
 		}
 
+		// for thrower := range t.m {
+		// 	fmt.Println("Round: ", i, "Monkey: ", t.m[thrower].id, "items: ", t.m[thrower].items)
+		// }
 	}
 
 	business := make([]int, 0)

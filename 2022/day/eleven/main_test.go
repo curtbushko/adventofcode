@@ -118,9 +118,15 @@ func Test_ProcessMonkeys(t *testing.T) {
 	}{
 		{
 			name:     "example",
-			actual:   inputaoc,
-			expected: 0,
+			actual:   inputexample,
+			expected: 10605,
 		},
+
+		// {
+		// 	name:     "example",
+		// 	actual:   inputaoc,
+		// 	expected: 72884,
+		// },
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -184,31 +190,6 @@ func Test_MonkeyTarget(t *testing.T) {
 	}
 }
 
-// func Test_Run(t *testing.T) {
-// 	cases := []struct {
-// 		name     string
-// 		actual   string
-// 		expected int
-// 	}{
-// 		{
-// 			name:     "example",
-// 			actual:   "example.input",
-// 			expected: 13,
-// 		},
-// 		// {
-// 		// 	name:     "large example",
-// 		// 	actual:   "large.input",
-// 		// 	expected: 6175,
-// 		// },
-// 	}
-// 	for _, c := range cases {
-// 		t.Run(c.name, func(t *testing.T) {
-// 			got := run(c.actual)
-// 			assert.Equal(t, c.expected, got)
-// 		})
-// 	}
-// }
-
 func Test_ThrowCatch(t *testing.T) {
 	m := []Monkey{
 		{
@@ -261,6 +242,34 @@ const monkey1 = `Monkey 1:
     If false: throw to monkey 0`
 
 const inputaoc = `Monkey 0:
+  Starting items: 79, 98
+  Operation: new = old * 19
+  Test: divisible by 23
+    If true: throw to monkey 2
+    If false: throw to monkey 3
+
+Monkey 1:
+  Starting items: 54, 65, 75, 74
+  Operation: new = old + 6
+  Test: divisible by 19
+    If true: throw to monkey 2
+    If false: throw to monkey 0
+
+Monkey 2:
+  Starting items: 79, 60, 97
+  Operation: new = old * old
+  Test: divisible by 13
+    If true: throw to monkey 1
+    If false: throw to monkey 3
+
+Monkey 3:
+  Starting items: 74
+  Operation: new = old + 3
+  Test: divisible by 17
+    If true: throw to monkey 0
+    If false: throw to monkey 1`
+
+const inputexample = `Monkey 0:
   Starting items: 79, 98
   Operation: new = old * 19
   Test: divisible by 23
