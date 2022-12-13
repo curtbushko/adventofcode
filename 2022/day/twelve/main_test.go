@@ -2,11 +2,9 @@ package main
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func Test_Run(t *testing.T) {
+func Test_CreateGrid(t *testing.T) {
 	cases := []struct {
 		name     string
 		actual   string
@@ -14,19 +12,19 @@ func Test_Run(t *testing.T) {
 	}{
 		{
 			name:     "example",
-			actual:   exampleinput,
+			actual:   "example.input",
 			expected: 31,
 		},
-		{
-			name:     "large example",
-			actual:   "large.input",
-			expected: 6175,
-		},
+		// {
+		// 	name:     "large example",
+		// 	actual:   "large.input",
+		// 	expected: 6175,
+		// },
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := run(c.actual)
-			assert.Equal(t, c.expected, got)
+			got := createGrid(c.actual)
+			got.Print()
 		})
 	}
 }
