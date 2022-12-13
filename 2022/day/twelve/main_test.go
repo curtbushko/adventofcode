@@ -10,20 +10,20 @@ func Test_CreateGrid(t *testing.T) {
 		actual   string
 		expected int
 	}{
-		{
-			name:     "example",
-			actual:   "example.input",
-			expected: 31,
-		},
 		// {
-		// 	name:     "large example",
-		// 	actual:   "large.input",
-		// 	expected: 6175,
+		// 	name:     "example",
+		// 	actual:   "example.input",
+		// 	expected: 31,
 		// },
+		{
+			name:     "large example",
+			actual:   "large.input",
+			expected: 6175,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := createGrid(c.actual)
+			got := createGraph(c.actual)
 			got.Print()
 		})
 	}
