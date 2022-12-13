@@ -48,8 +48,10 @@ func (m Monkey) String() string {
 	return fmt.Sprintf("Monkey %d\n items: %d\n operations: %s\n test: %d\n \ttrue target: %d\n\tfalse target: %d\n", m.id, m.items, m.op, m.test, m.ttarget, m.ftarget)
 }
 
-func (m Monkey) Operation(old int) (worry int) {
+func (m Monkey) Operation(old, reduction int) (worry int) {
 	f := strings.Fields(m.op)
+
+	old = old % reduction
 
 	term := 0
 	switch f[2] {
@@ -68,6 +70,35 @@ func (m Monkey) Operation(old int) (worry int) {
 
 	return worry
 	// return worry
+}
+
+func Reducer(m []Monkey) int {
+	items := make([]int, 0)
+	for _, monkies := range m {
+		items = append(items, monkies.items...)
+	}
+	fmt.Println("items:", items)
+	lcm := LCM(items[0], items[1], items...)
+	return lcm
+}
+
+func GCD(a, b int) int {
+	for b != 0 {
+		t := b
+		b = a % b
+		a = t
+	}
+	return a
+}
+
+func LCM(a, b int, integers ...int) int {
+	result := a * b / GCD(a, b)
+
+	for i := 0; i < len(integers); i++ {
+		result = LCM(result, integers[i])
+	}
+
+	return result
 }
 
 func (m Monkey) Target(worry int) int {
@@ -124,13 +155,16 @@ func processMonkeys(m []Monkey) (total int) {
 	activity := make([]int, len(m))
 
 	for i := 0; i < rounds; i++ {
-		// fmt.Println("Round ", i)
+		// At the beginning of each round reduce the worry # for each monkey using LCM
+		reduction := Reducer(m)
+		fmt.Println("Reduction: ", reduction)
+
 		for thrower := range m {
 			num := len(m[thrower].items)
 			for j := 0; j < num; j++ {
-				worry := m[thrower].Operation(m[thrower].items[0])
+				worry := m[thrower].Operation(m[thrower].items[0], reduction)
 				target := m[thrower].Target(worry)
-				fmt.Println("Monkey ", m[thrower].id, "items: ", m[thrower].items, "worry: ", worry, "target: ", target)
+				// fmt.Println("Monkey ", m[thrower].id, "items: ", m[thrower].items, "worry: ", worry, "target: ", target)
 				_ = m[thrower].Throw()
 				activity[thrower]++
 				m[target].Catch(worry)

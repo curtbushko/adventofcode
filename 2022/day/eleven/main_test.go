@@ -115,7 +115,7 @@ func Test_ProcessMonkeys(t *testing.T) {
 		{
 			name:     "example",
 			actual:   inputexample,
-			expected: 10605,
+			expected: 2713310158, // Part2 expected
 		},
 
 		// {
@@ -163,7 +163,7 @@ func Test_MonkeyOperation(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			monkey := makeMonkey(c.actual)
-			got := monkey.Operation(monkey.items[0])
+			got := monkey.Operation(monkey.items[0], 1)
 			assert.Equal(t, c.expected, got)
 		})
 	}
@@ -189,7 +189,7 @@ func Test_MonkeyTarget(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			monkey := makeMonkey(c.actual)
-			worry := monkey.Operation(monkey.items[0])
+			worry := monkey.Operation(monkey.items[0], 1)
 			got := monkey.Target(worry)
 			assert.Equal(t, c.expected, got)
 		})
