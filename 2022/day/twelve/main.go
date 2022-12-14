@@ -35,8 +35,20 @@ type Graph struct {
 	Start, End    *Node
 	Width, Height int
 	Nodes         []*Node
-	Edges         map[string][]*Edge
+	Edges         map[Node][]*Edge
 	mutex         sync.RWMutex
+}
+
+type Vertex struct {
+	Node     *Node
+	Distance int
+}
+
+type PriorityQueue []*Vertex
+
+type NodeQueue struct {
+	Items []Vertex
+	Lock  sync.RWMutex
 }
 
 func main() {
@@ -66,7 +78,7 @@ func createGraph(filename string) *Graph {
 	g := &Graph{
 		Width:  0,
 		Height: 0,
-		Edges:  make(map[string][]*Edge),
+		Edges:  make(map[Node][]*Edge),
 	}
 	y := 0
 	nodes := make(map[string]*Node) // Used to create the edges
@@ -141,7 +153,10 @@ func createGraph(filename string) *Graph {
 
 	}
 
-	dijkstra(g)
+	stuff, more := getShortestPath(g.Start, g.End, g)
+	fmt.Println(stuff)
+	fmt.Println(more)
+
 	for _, node := range g.Nodes {
 		fmt.Printf("Shortest time from %c to %c is %d\n",
 			g.Start.Rune, node.Rune, node.Value)
@@ -153,6 +168,65 @@ func createGraph(filename string) *Graph {
 	}
 
 	return g
+}
+
+func getShortestPath(startNode *Node, endNode *Node, g *Graph) ([]int, int) {
+	visited := make(map[int]bool)
+	dist := make(map[int]int)
+	prev := make(map[int]int)
+	// pq := make(PriorityQueue, 1)
+	// heap.Init(&pq)
+	q := NodeQueue{}
+	pq := q.NewQ()
+	start := Vertex{
+		Node:     startNode,
+		Distance: 0,
+	}
+	for _, nval := range g.Nodes {
+		dist[nval.Value] = math.MaxInt64
+	}
+	dist[startNode.Value] = start.Distance
+	pq.Enqueue(start)
+	// im := 0
+	for !pq.IsEmpty() {
+		v := pq.Dequeue()
+		if visited[v.Node.Value] {
+			continue
+		}
+		visited[v.Node.Value] = true
+		near := g.Edges[*v.Node]
+
+		for _, val := range near {
+			if !visited[val.Node.Value] {
+				if dist[v.Node.Value]+val.Weight < dist[val.Node.Value] {
+					store := Vertex{
+						Node:     val.Node,
+						Distance: dist[v.Node.Value] + val.Weight,
+					}
+					dist[val.Node.Value] = dist[v.Node.Value] + val.Weight
+					// prev[val.Node.Value] = fmt.Sprintf("->%s", v.Node.Value)
+					prev[val.Node.Value] = v.Node.Value
+					pq.Enqueue(store)
+				}
+				// visited[val.Node.value] = true
+			}
+		}
+	}
+	fmt.Println(dist)
+	fmt.Println(prev)
+	pathval := prev[endNode.Value]
+	var finalArr []int
+	finalArr = append(finalArr, endNode.Value)
+	for pathval != startNode.Value {
+		finalArr = append(finalArr, pathval)
+		pathval = prev[pathval]
+	}
+	finalArr = append(finalArr, pathval)
+	fmt.Println(finalArr)
+	for i, j := 0, len(finalArr)-1; i < j; i, j = i+1, j-1 {
+		finalArr[i], finalArr[j] = finalArr[j], finalArr[i]
+	}
+	return finalArr, dist[endNode.Value]
 }
 
 func (g *Graph) Print() {
@@ -183,102 +257,79 @@ func (g *Graph) AddNode(n *Node) {
 	g.Nodes = append(g.Nodes, n)
 }
 
+// AddEdge adds an edge to the graph
 func (g *Graph) AddEdge(n1, n2 *Node, weight int) {
 	g.mutex.Lock()
-	defer g.mutex.Unlock()
-	g.Edges[n1.Name] = append(g.Edges[n1.Name], &Edge{n2, weight})
-	// g.Edges[n2.Name] = append(g.Edges[n2.Name], &Edge{n1, weight})
-}
-
-// Stole this heap
-type Heap struct {
-	elements []*Node
-	mutex    sync.RWMutex
-}
-
-func (h *Heap) Size() int {
-	h.mutex.RLock()
-	defer h.mutex.RUnlock()
-	return len(h.elements)
-}
-
-// push an element to the heap, re-arrange the heap
-func (h *Heap) Push(element *Node) {
-	h.mutex.Lock()
-	defer h.mutex.Unlock()
-	h.elements = append(h.elements, element)
-	i := len(h.elements) - 1
-	for ; h.elements[i].Value < h.elements[parent(i)].Value; i = parent(i) {
-		h.swap(i, parent(i))
+	if g.Edges == nil {
+		g.Edges = make(map[Node][]*Edge)
 	}
-}
-
-// pop the top of the heap, which is the min Value
-func (h *Heap) Pop() (i *Node) {
-	h.mutex.Lock()
-	defer h.mutex.Unlock()
-	i = h.elements[0]
-	h.elements[0] = h.elements[len(h.elements)-1]
-	h.elements = h.elements[:len(h.elements)-1]
-	h.rearrange(0)
-	return
-}
-
-// rearrange the heap
-func (h *Heap) rearrange(i int) {
-	smallest := i
-	left, right, size := leftChild(i), rightChild(i), len(h.elements)
-	if left < size && h.elements[left].Value < h.elements[smallest].Value {
-		smallest = left
+	ed1 := Edge{
+		Node:   n2,
+		Weight: weight,
 	}
-	if right < size && h.elements[right].Value < h.elements[smallest].Value {
-		smallest = right
+	g.Edges[*n1] = append(g.Edges[*n1], &ed1)
+	// g.Edges[*n2] = append(g.Edges[*n2], &ed2)
+	g.mutex.Unlock()
+}
+
+// Enqueue adds an Node to the end of the queue
+func (s *NodeQueue) Enqueue(t Vertex) {
+	s.Lock.Lock()
+	if len(s.Items) == 0 {
+		s.Items = append(s.Items, t)
+		s.Lock.Unlock()
+		return
 	}
-	if smallest != i {
-		h.swap(i, smallest)
-		h.rearrange(smallest)
-	}
-}
-
-func (h *Heap) swap(i, j int) {
-	h.elements[i], h.elements[j] = h.elements[j], h.elements[i]
-}
-
-func parent(i int) int {
-	return (i - 1) / 2
-}
-
-func leftChild(i int) int {
-	return 2*i + 1
-}
-
-func rightChild(i int) int {
-	return 2*i + 2
-}
-
-func dijkstra(graph *Graph) {
-	visited := make(map[string]bool)
-	heap := &Heap{}
-
-	startNode := graph.GetNode(graph.Start.Name)
-	startNode.Value = 0
-	heap.Push(startNode)
-
-	fmt.Println("Starting Dijkstra")
-	for heap.Size() > 0 {
-		current := heap.Pop()
-		visited[current.Name] = true
-		edges := graph.Edges[current.Name]
-		for _, edge := range edges {
-			if !visited[edge.Node.Name] {
-				heap.Push(edge.Node)
-				if current.Value+edge.Weight < edge.Node.Value {
-					edge.Node.Value = current.Value + edge.Weight
-					edge.Node.Through = current
-				}
+	var insertFlag bool
+	for k, v := range s.Items {
+		if t.Distance < v.Distance {
+			if k > 0 {
+				s.Items = append(s.Items[:k+1], s.Items[k:]...)
+				s.Items[k] = t
+				insertFlag = true
+			} else {
+				s.Items = append([]Vertex{t}, s.Items...)
+				insertFlag = true
 			}
 		}
+		if insertFlag {
+			break
+		}
 	}
+	if !insertFlag {
+		s.Items = append(s.Items, t)
+	}
+	// s.items = append(s.items, t)
+	s.Lock.Unlock()
+}
 
-	fmt.Println("Done")
+// Dequeue removes an Node from the start of the queue
+func (s *NodeQueue) Dequeue() *Vertex {
+	s.Lock.Lock()
+	item := s.Items[0]
+	s.Items = s.Items[1:len(s.Items)]
+	s.Lock.Unlock()
+	return &item
+}
+
+// NewQ Creates New Queue
+func (s *NodeQueue) NewQ() *NodeQueue {
+	s.Lock.Lock()
+	s.Items = []Vertex{}
+	s.Lock.Unlock()
+	return s
+}
+
+// IsEmpty returns true if the queue is empty
+func (s *NodeQueue) IsEmpty() bool {
+	s.Lock.RLock()
+	defer s.Lock.RUnlock()
+	return len(s.Items) == 0
+}
+
+// Size returns the number of Nodes in the queue
+func (s *NodeQueue) Size() int {
+	s.Lock.RLock()
+	defer s.Lock.RUnlock()
+	return len(s.Items)
 }
