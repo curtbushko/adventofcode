@@ -128,25 +128,25 @@ func createGraph(filename string) *Graph {
 
 		if _, exists := nodes[north]; exists {
 			if (node.Rune == nodes[north].Rune) || (node.Rune+1 == nodes[north].Rune) || (node.Rune > nodes[north].Rune) {
-				fmt.Printf("Node Rune: %c North Rune: %c\n", node.Rune, nodes[north].Rune)
+				// fmt.Printf("Node Rune: %c North Rune: %c\n", node.Rune, nodes[north].Rune)
 				g.AddEdge(nodes[node.Name], nodes[north], weight)
 			}
 		}
 		if _, exists := nodes[south]; exists {
 			if (node.Rune == nodes[south].Rune) || (node.Rune+1 == nodes[south].Rune) || (node.Rune > nodes[south].Rune) {
-				fmt.Printf("Node Rune: %c South Rune: %c\n", node.Rune, nodes[south].Rune)
+				// fmt.Printf("Node Rune: %c South Rune: %c\n", node.Rune, nodes[south].Rune)
 				g.AddEdge(nodes[node.Name], nodes[south], weight)
 			}
 		}
 		if _, exists := nodes[east]; exists {
 			if (node.Rune == nodes[east].Rune) || (node.Rune+1 == nodes[east].Rune) || (node.Rune > nodes[east].Rune) {
-				fmt.Printf("Node Rune: %c East Rune: %c\n", node.Rune, nodes[east].Rune)
+				// fmt.Printf("Node Rune: %c East Rune: %c\n", node.Rune, nodes[east].Rune)
 				g.AddEdge(nodes[node.Name], nodes[east], weight)
 			}
 		}
 		if _, exists := nodes[west]; exists {
 			if (node.Rune == nodes[west].Rune) || (node.Rune+1 == nodes[west].Rune) || (node.Rune > nodes[west].Rune) {
-				fmt.Printf("Node Rune: %c West Rune: %c\n", node.Rune, nodes[west].Rune)
+				// fmt.Printf("Node Rune: %c West Rune: %c\n", node.Rune, nodes[west].Rune)
 				g.AddEdge(nodes[node.Name], nodes[west], weight)
 			}
 		}
@@ -157,15 +157,15 @@ func createGraph(filename string) *Graph {
 	fmt.Println(stuff)
 	fmt.Println(more)
 
-	for _, node := range g.Nodes {
-		fmt.Printf("Shortest time from %c to %c is %d\n",
-			g.Start.Rune, node.Rune, node.Value)
-		for n := node; n.Through != nil; n = n.Through {
-			fmt.Printf("%c <- ", n.Rune)
-		}
-		fmt.Printf("%c\n", g.Start.Rune)
-		fmt.Println()
-	}
+	// for _, node := range g.Nodes {
+	// 	fmt.Printf("Shortest time from %c to %c is %d\n",
+	// 		g.Start.Rune, node.Rune, node.Value)
+	// 	for n := node; n.Through != nil; n = n.Through {
+	// 		fmt.Printf("%c <- ", n.Rune)
+	// 	}
+	// 	fmt.Printf("%c\n", g.Start.Rune)
+	// 	fmt.Println()
+	// }
 
 	return g
 }
@@ -208,7 +208,7 @@ func getShortestPath(startNode *Node, endNode *Node, g *Graph) ([]int, int) {
 					prev[val.Node.Value] = v.Node.Value
 					pq.Enqueue(store)
 				}
-				// visited[val.Node.value] = true
+				visited[val.Node.Value] = true
 			}
 		}
 	}
